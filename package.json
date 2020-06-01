@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "firebase": "^7.14.6",
     "node-sass": "^4.14.1",
     "prettier": "^2.0.5",
     "sass-loader": "^7.3.1",
@@ -59,7 +60,6 @@
     "node": ">= 6.0.0",
     "npm": ">= 3.0.0"
   },
-  
   "eslintConfig": {
     "root": true,
     "extends": [
