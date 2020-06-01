@@ -7,7 +7,9 @@
                 class="todo-item-label"
                 @dblclick="editTodo"
                 :class="{ completed: completed }"
-            >{{ title }}</div>
+            >
+                {{ title }}
+            </div>
             <input
                 v-else
                 class="todo-item-edit"
@@ -28,77 +30,75 @@
 
 <script>
 export default {
-    name: 'todo-item',
+    name: "todo-item",
     props: {
         todo: {
             type: Object,
-            required: true
+            required: true,
         },
         index: {
             type: Number,
-            required: true
+            required: true,
         },
-        checkAll:{
+        checkAll: {
             type: Boolean,
-            required: true
-        }
+            required: true,
+        },
     },
     data() {
         return {
-            'id': this.todo.id,
-            'title': this.todo.title,
-            'completed': this.todo.completed,
-            'editing': this.todo.editing,
-            'beforeEditCache': ''
-        }
+            id: this.todo.id,
+            title: this.todo.title,
+            completed: this.todo.completed,
+            editing: this.todo.editing,
+            beforeEditCache: "",
+        };
     },
     watch: {
-        checkAll(){
-            this.completed = this.checkAll ? true : this.todo.completed
-        }
+        checkAll() {
+            this.completed = this.checkAll ? true : this.todo.completed;
+        },
     },
     methods: {
-        removeTodo(index){
-            eventBus.$emit('removedTodo', index)
+        removeTodo(id) {
+            this.$store.dispatch("deleteTodo", id);
         },
         editTodo() {
             this.beforeEditCache = this.title;
             this.editing = true;
         },
-        doneEdit(todo) {
+        doneEdit() {
             if (this.title.trim() == "") {
                 this.title = this.beforeEditCache;
             }
             this.editing = false;
-            eventBus.$emit('finishedEdit', {
-                'index': this.index,
-                'todo': {
-                    'id': this.id,
-                    'title': this.title,
-                    'completed': this.completed,
-                    'editing': this.editing
-                }
-            })
+
+            this.$store.dispatch("updateTodo", {
+                id: this.id,
+                title: this.title,
+                completed: this.completed,
+                editing: this.editing,
+            });
         },
         cancelEdit() {
             this.title = this.beforeEditCache;
             this.editing = false;
         },
-        pluralize () {
-            eventBus.$emit('pluralize');
+        pluralize() {
+            eventBus.$emit("pluralize");
         },
         handlePluralize() {
-            this.title = this.title + 's';
-            eventBus.$emit('finishedEdit', {
-                'index': this.index,
-                'todo': {
-                    'id': this.id,
-                    'title': this.title,
-                    'completed': this.completed,
-                    'editing': this.editing
-                }
-            })
-        }
+            this.title = this.title + "s";
+            const index = this.$store.state.todos.findIndex(
+                (item) => item.id == this.id
+            );
+            this.$store.state.todos.splice(index, 1, {
+                id: this.id,
+                title: this.title,
+                completed: this.completed,
+                editing: this.editing,
+            });
+        },
     },
     directives: {
         focus: {
@@ -107,11 +107,11 @@ export default {
             },
         },
     },
-    created () {
-        eventBus.$on('pluralize', this.handlePluralize);
+    created() {
+        eventBus.$on("pluralize", this.handlePluralize);
     },
     beforeDestroy() {
-        eventBus.$off('pluralize', this.handlePluralize);
-    }
-}
+        eventBus.$off("pluralize", this.handlePluralize);
+    },
+};
 </script>
